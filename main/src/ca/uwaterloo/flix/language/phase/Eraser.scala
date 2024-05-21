@@ -115,6 +115,7 @@ object Eraser {
         case AtomicOp.Box => ApplyAtomic(op, es, t, purity, loc)
         case AtomicOp.InvokeConstructor(_) => ApplyAtomic(op, es, t, purity, loc)
         case AtomicOp.InvokeMethod(_) => ApplyAtomic(op, es, t, purity, loc)
+        case AtomicOp.InvokeMethod2(_) => ApplyAtomic(op, es, t, purity, loc)
         case AtomicOp.InvokeStaticMethod(_) => ApplyAtomic(op, es, t, purity, loc)
         case AtomicOp.GetField(_) => ApplyAtomic(op, es, t, purity, loc)
         case AtomicOp.PutField(_) => ApplyAtomic(op, es, t, purity, loc)

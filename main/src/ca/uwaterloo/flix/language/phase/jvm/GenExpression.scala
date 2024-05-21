@@ -1073,6 +1073,9 @@ object GenExpression {
         mv.visitInsn(SWAP)
         mv.visitMethodInsn(INVOKESPECIAL, className.toInternalName, "<init>", s"(${BackendObjType.ReifiedSourceLocation.toDescriptor})${JvmType.Void.toDescriptor}", false)
         mv.visitInsn(ATHROW)
+
+      case AtomicOp.InvokeMethod2(_) =>
+        throw InternalCompilerException("Unresolved invoked method.", loc)
     }
 
     case Expr.ApplyClo(exp, exps, ct, _, purity, loc) =>

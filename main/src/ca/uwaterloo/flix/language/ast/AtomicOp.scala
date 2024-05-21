@@ -78,6 +78,8 @@ object AtomicOp {
 
   case class InvokeMethod(method: Method) extends AtomicOp
 
+  case class InvokeMethod2(ident: Name.Ident) extends AtomicOp
+
   case class InvokeStaticMethod(method: Method) extends AtomicOp
 
   case class GetField(field: Field) extends AtomicOp

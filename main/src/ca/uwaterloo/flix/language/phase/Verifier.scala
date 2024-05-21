@@ -419,6 +419,9 @@ object Verifier {
           checkJavaSubtype(t, method.getDeclaringClass, loc)
           checkJavaSubtype(tpe, method.getReturnType, loc)
 
+        case AtomicOp.InvokeMethod2(ident) =>
+          tpe // TO DO
+
         case AtomicOp.InvokeStaticMethod(method) =>
           checkJavaParameters(ts, method.getParameterTypes.toList, loc)
           checkJavaSubtype(tpe, method.getReturnType, loc)
