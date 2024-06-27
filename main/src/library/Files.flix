@@ -806,12 +806,11 @@ mod Files {
     ///
     pub def list(f: String): Result[IOError, List[String]] \ IO = region rc {
         try {
-            import java_new java.io.File(String): File \ IO as newFile;
             import java.io.File.listFiles(): Array[File, rc] \ IO;
             import java.io.File.toPath(): Path \ IO;
             import java.nio.file.Path.toString(): String \ IO as pathToString;
 
-            let javaList = f |> newFile |> listFiles;
+            let javaList = new File(f) |> listFiles;
 
             if (not Object.isNull(javaList)) {
                 let paths = javaList |> Array.map(rc, toPath >> pathToString);
