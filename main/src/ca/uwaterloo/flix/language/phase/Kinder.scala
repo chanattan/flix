@@ -77,7 +77,7 @@ object Kinder {
 
         mapN(enumsVal, restrictableEnumsVal, traitsVal, defsVal, instancesVal, effectsVal) {
           case (enums, restrictableEnums, traits, defs, instances, effects) =>
-            KindedAst.Root(traits, instances, defs, enums, restrictableEnums, effects, taenv, root.uses, root.entryPoint, root.sources, root.names)
+            KindedAst.Root(traits, instances, defs, enums, Map.empty, restrictableEnums, effects, taenv, root.uses, root.entryPoint, root.sources, root.names)
         }
     }
 
@@ -602,7 +602,9 @@ object Kinder {
     case ResolvedAst.Expr.ArrayLength(base0, loc) =>
       val baseVal = visitExp(base0, kenv0, taenv, henv0, root)
       mapN(baseVal) {
-        base => KindedAst.Expr.ArrayLength(base, loc)
+        base =>
+          val evar = Type.freshVar(Kind.Eff, loc.asSynthetic)
+          KindedAst.Expr.ArrayLength(base, evar, loc)
       }
 
     case ResolvedAst.Expr.VectorLit(exps, loc) =>
@@ -1229,6 +1231,9 @@ object Kinder {
         case Some(k) => Validation.success(Type.Cst(TypeConstructor.Enum(sym, k), loc))
         case None => Validation.toHardFailure(KindError.UnexpectedKind(expectedKind = expectedKind, actualKind = kind, loc))
       }
+    
+    case UnkindedType.Struct(sym, loc) =>
+      throw new RuntimeException("Joe: Structs are not supported yet.")
 
     case UnkindedType.RestrictableEnum(sym, loc) =>
       val kind = getRestrictableEnumKind(root.restrictableEnums(sym))
@@ -1569,6 +1574,9 @@ object Kinder {
           kenv => acc ++ kenv
         }
       }
+
+    case UnkindedType.Struct(sym, _) =>
+      throw new RuntimeException("Joe: Structs are not supported in the kind checker yet.")
 
     case UnkindedType.RestrictableEnum(sym, _) =>
       val tyconKind = getRestrictableEnumKind(root.restrictableEnums(sym))
