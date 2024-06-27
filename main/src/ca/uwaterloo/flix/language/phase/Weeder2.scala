@@ -833,8 +833,8 @@ object Weeder2 {
         case TreeKind.Expr.Try => visitTryExpr(tree)
         case TreeKind.Expr.Do => visitDoExpr(tree)
         case TreeKind.Expr.InvokeConstructor2 => visitInvokeConstructor2Expr(tree)
-        case TreeKind.Expr.InvokeMethod2 => visitInvokeMethod2Expr(tree)
-        case TreeKind.Expr.InvokeStaticMethod2 => visitInvokeStaticMethod2Expr(tree)
+        case TreeKind.Expr.JavaSelect => visitJavaSelectExpr(tree)
+        case TreeKind.Expr.JavaSelectStatic => visitJavaSelectStaticExpr(tree)
         case TreeKind.Expr.NewObject => visitNewObjectExpr(tree)
         case TreeKind.Expr.Static => visitStaticExpr(tree)
         case TreeKind.Expr.Select => visitSelectExpr(tree)
@@ -1756,47 +1756,23 @@ object Weeder2 {
       }
     }
 
-    private def visitInvokeMethod2Expr(tree: Tree): Validation[Expr, CompilationMessage] = {
-      expect(tree, TreeKind.Expr.InvokeMethod2)
-      val fragmentsTrees = pickAll(TreeKind.Expr.InvokeMethod2Fragment, tree)
-      val fragments = traverse(fragmentsTrees)(visitInvokeMethod2Fragment)
-      val objName = pickNameIdent(tree)
-      mapN(objName, fragments) {
-        case (objName, fragments) =>
-          val nameExpr = Expr.Ambiguous(Name.QName(Name.RootNS, objName, objName.loc), objName.loc)
-          // TODO INTEROP InvokeMethod2 source location is likely off
-          fragments.foldLeft[Expr](nameExpr) {
-            case (acc, (methodName, arguments)) => Expr.InvokeMethod2(acc, methodName, arguments, tree.loc)
-          }
+    private def visitJavaSelectExpr(tree: Tree): Validation[Expr, CompilationMessage] = {
+      expect(tree, TreeKind.Expr.JavaSelect)
+      val expr = pickExpr(tree)
+      val fieldName = pickNameIdent(tree)
+      mapN(expr, fieldName) {
+        case (expr, fieldName) =>
+          Expr.JavaSelect(expr, fieldName, tree.loc)
       }
     }
 
-    private def visitInvokeStaticMethod2Expr(tree: Tree): Validation[Expr, CompilationMessage] = {
-      expect(tree, TreeKind.Expr.InvokeStaticMethod2)
-      val List(clazzTree, methodTree) = pickAll(TreeKind.Ident, tree) // TODO: Resilience
-      mapN(tokenToIdent(clazzTree), tokenToIdent(methodTree), pickArguments(tree)) {
-        (clazzName, methodName, exps) =>
-          Expr.InvokeStaticMethod2(clazzName, methodName, exps, tree.loc)
-      }
-    }
-
-    /**
-      * Helper method to visit a sub-expression of invokeMethod2.
-      * We may consider a sub-expression the following: someCall(x, y, ...)
-      * which contains the method name "someCall" and its arguments x, y, ...
-      *
-      * Its purpose is to ease manipulation of consecutive java calls, e.g.:
-      *
-      * obj#method1()#method2()
-      *
-      * contains two invokeMethod2 fragments.
-      */
-    private def visitInvokeMethod2Fragment(tree: Tree): Validation[(Name.Ident, List[Expr]), CompilationMessage] = {
-      expect(tree, TreeKind.Expr.InvokeMethod2Fragment)
-      val methodName = pickNameIdent(tree)
-      val arguments = pickRawArguments(tree)
-      mapN(methodName, arguments) {
-        (methodName, arguments) => (methodName, arguments)
+    private def visitJavaSelectStaticExpr(tree: Tree): Validation[Expr, CompilationMessage] = {
+      expect(tree, TreeKind.Expr.JavaSelectStatic)
+      val expr = pickExpr(tree)
+      val fieldName = pickNameIdent(tree)
+      mapN(expr, fieldName) {
+        case (expr, fieldName) =>
+          Expr.JavaSelectStatic(expr, fieldName, tree.loc)
       }
     }
 

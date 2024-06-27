@@ -202,6 +202,10 @@ object WeededAst {
 
     case class InvokeConstructor2(clazzName: Name.Ident, exps: List[Expr], loc: SourceLocation) extends Expr
 
+    case class JavaSelect(exp: Expr, fieldName: Name.Ident, loc: SourceLocation) extends Expr
+
+    case class JavaSelectStatic(exp: Expr, fieldName: Name.Ident, loc: SourceLocation) extends Expr
+
     case class InvokeMethod2(exp: Expr, methodName: Name.Ident, exps: List[Expr], loc: SourceLocation) extends Expr
 
     case class InvokeStaticMethod2(clazzName: Name.Ident, methodName: Name.Ident, exps: List[Expr], loc: SourceLocation) extends Expr

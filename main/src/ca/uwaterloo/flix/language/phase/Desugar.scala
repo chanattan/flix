@@ -17,11 +17,13 @@
 package ca.uwaterloo.flix.language.phase
 
 import ca.uwaterloo.flix.api.Flix
+import ca.uwaterloo.flix.language.ast.Ast.SyntacticContext
 import ca.uwaterloo.flix.language.ast.DesugaredAst.Expr
 import ca.uwaterloo.flix.language.ast.WeededAst.Predicate
 import ca.uwaterloo.flix.language.ast.shared.Fixity
 import ca.uwaterloo.flix.language.ast.{Ast, ChangeSet, DesugaredAst, Name, SourceLocation, Type, WeededAst}
 import ca.uwaterloo.flix.language.dbg.AstPrinter.DebugDesugaredAst
+import ca.uwaterloo.flix.language.errors.ParseError
 import ca.uwaterloo.flix.util.ParOps
 
 object Desugar {
@@ -733,6 +735,12 @@ object Desugar {
     case WeededAst.Expr.InvokeConstructor2(className, exps, loc) =>
       val es = visitExps(exps)
       Expr.InvokeConstructor2(className, es, loc)
+
+    case WeededAst.Expr.JavaSelect(expr, fieldName, loc) =>
+      Expr.Error(ParseError.Legacy("Java select not handled yet", SyntacticContext.Expr.OtherExpr, loc))
+
+    case WeededAst.Expr.JavaSelectStatic(expr, fieldName, loc) =>
+      Expr.Error(ParseError.Legacy("Java select static not handled yet", SyntacticContext.Expr.OtherExpr, loc))
 
     case WeededAst.Expr.InvokeMethod2(exp, name, exps, loc) =>
       val e = visitExp(exp)
